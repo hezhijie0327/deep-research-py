@@ -6,7 +6,7 @@ import openai
 from firecrawl import FirecrawlApp
 from .ai.providers import trim_prompt
 from .prompt import system_prompt
-import json
+import json5
 import aiohttp
 
 
@@ -158,10 +158,10 @@ async def generate_serp_queries(
     )
 
     try:
-        result = json.loads(response.choices[0].message.content)
+        result = json5.loads(response.choices[0].message.content)
         queries = result.get("queries", [])
         return [SerpQuery(**q) for q in queries][:num_queries]
-    except json.JSONDecodeError as e:
+    except json5.JSONDecodeError as e:
         print(f"Error parsing JSON response: {e}")
         print(f"Raw response: {response.choices[0].message.content}")
         return []
@@ -208,14 +208,14 @@ async def process_serp_result(
     )
 
     try:
-        result = json.loads(response.choices[0].message.content)
+        result = json5.loads(response.choices[0].message.content)
         return {
             "learnings": result.get("learnings", [])[:num_learnings],
             "followUpQuestions": result.get("followUpQuestions", [])[
                 :num_follow_up_questions
             ],
         }
-    except json.JSONDecodeError as e:
+    except json5.JSONDecodeError as e:
         print(f"Error parsing JSON response: {e}")
         print(f"Raw response: {response.choices[0].message.content}")
         return {"learnings": [], "followUpQuestions": []}
@@ -256,7 +256,7 @@ async def write_final_report(
     )
 
     try:
-        result = json.loads(response.choices[0].message.content)
+        result = json5.loads(response.choices[0].message.content)
         report = result.get("reportMarkdown", "")
 
         # Append sources
@@ -264,7 +264,7 @@ async def write_final_report(
             [f"- {url}" for url in visited_urls]
         )
         return report + urls_section
-    except json.JSONDecodeError as e:
+    except json5.JSONDecodeError as e:
         print(f"Error parsing JSON response: {e}")
         print(f"Raw response: {response.choices[0].message.content}")
         return "Error generating report"
