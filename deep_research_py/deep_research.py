@@ -8,7 +8,6 @@ from .ai.providers import trim_prompt
 from .prompt import system_prompt
 import json
 import aiohttp
-import re
 
 
 class SearchResponse(TypedDict):
@@ -132,29 +131,6 @@ else:
     searxng = SearXNG(api_url=os.environ.get("SEARXNG_API_URL", "http://127.0.0.1:8080/search"))
 
 
-def fix_and_flatten_json(raw_json: str) -> str:
-    """
-    修复 JSON 格式错误，并转换为单行 JSON。
-    
-    参数:
-        raw_json (str): 原始 JSON 字符串，可能包含格式错误。
-    
-    返回:
-        str: 修复后的单行 JSON 字符串。
-    """
-    # 修复 JSON 结构（去除错误的逗号，补全引号）
-    fixed_json = re.sub(r',\s*\n\s*["}]', '}', raw_json)  # 修正逗号错误
-    fixed_json = fixed_json.replace('"}, {', '},{')  # 修复数组分隔符问题
-
-    try:
-        # 解析 JSON
-        data = json.loads(fixed_json)
-        # 转换为单行 JSON
-        return json.dumps(data, ensure_ascii=False, separators=(",", ":"))
-    except json.JSONDecodeError as e:
-        raise ValueError(f"JSON 解析失败: {e}")
-
-
 async def generate_serp_queries(
     query: str,
     client: openai.OpenAI,
@@ -232,7 +208,7 @@ async def process_serp_result(
     )
 
     try:
-        result = json.loads(fix_and_flatten_json(response.choices[0].message.content))
+        result = json.loads(response.choices[0].message.content)
         return {
             "learnings": result.get("learnings", [])[:num_learnings],
             "followUpQuestions": result.get("followUpQuestions", [])[
