@@ -158,7 +158,7 @@ async def generate_serp_queries(
     )
 
     try:
-        result = json.loads(json.dumps(response.choices[0].message.content, ensure_ascii=False))
+        result = json.loads(response.choices[0].message.content)
         queries = result.get("queries", [])
         return [SerpQuery(**q) for q in queries][:num_queries]
     except json.JSONDecodeError as e:
@@ -208,7 +208,7 @@ async def process_serp_result(
     )
 
     try:
-        result = json.loads(json.dumps(response.choices[0].message.content, ensure_ascii=False))
+        result = json.loads(response.choices[0].message.content)
         return {
             "learnings": result.get("learnings", [])[:num_learnings],
             "followUpQuestions": result.get("followUpQuestions", [])[
@@ -256,7 +256,7 @@ async def write_final_report(
     )
 
     try:
-        result = json.loads(json.dumps(response.choices[0].message.content, ensure_ascii=False))
+        result = json.loads(response.choices[0].message.content)
         report = result.get("reportMarkdown", "")
 
         # Append sources
