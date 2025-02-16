@@ -7,7 +7,6 @@ from firecrawl import FirecrawlApp
 from .ai.providers import trim_prompt
 from .prompt import system_prompt
 import json
-import json5
 import aiohttp
 
 
@@ -159,7 +158,7 @@ async def generate_serp_queries(
     )
 
     try:
-        result = json.loads(json5.loads(response.choices[0].message.content))
+        result = json.loads(json.dumps(response.choices[0].message.content, ensure_ascii=False))
         queries = result.get("queries", [])
         return [SerpQuery(**q) for q in queries][:num_queries]
     except json.JSONDecodeError as e:
@@ -209,7 +208,7 @@ async def process_serp_result(
     )
 
     try:
-        result = json.loads(json5.loads(response.choices[0].message.content))
+        result = json.loads(json.dump(response.choices[0].message.content, ensure_ascii=False))
         return {
             "learnings": result.get("learnings", [])[:num_learnings],
             "followUpQuestions": result.get("followUpQuestions", [])[
@@ -257,7 +256,7 @@ async def write_final_report(
     )
 
     try:
-        result = json.loads(json5.loads(response.choices[0].message.content))
+        result = json.loads(json.dump(response.choices[0].message.content, ensure_ascii=False))
         report = result.get("reportMarkdown", "")
 
         # Append sources
