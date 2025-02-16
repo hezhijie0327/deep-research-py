@@ -119,17 +119,6 @@ class SearXNG:
             return {"data": []}
 
 
-# Initialize Firecrawl
-firecrawl = Firecrawl(
-    api_key=os.environ.get("FIRECRAWL_API_KEY", ""),
-    api_url=os.environ.get("FIRECRAWL_BASE_URL"),
-)
-
-
-# Initialize SearXNG
-searxng = SearXNG(api_url=os.environ.get("SEARXNG_API_URL", "http://127.0.0.1:8080/search"))
-
-
 async def generate_serp_queries(
     query: str,
     client: openai.OpenAI,
@@ -309,10 +298,19 @@ async def deep_research(
             try:
                 # Search for content
                 if SEARCH_PROVIDER == "firecrawl":
+                    # Initialize Firecrawl
+                    firecrawl = Firecrawl(
+                        api_key=os.environ.get("FIRECRAWL_API_KEY", ""),
+                        api_url=os.environ.get("FIRECRAWL_BASE_URL"),
+                    )
+
                     result = await firecrawl.search(
                         serp_query.query, timeout=15000, limit=5
                     )
                 else:
+                    # Initialize SearXNG
+                    searxng = SearXNG(api_url=os.environ.get("SEARXNG_API_URL", "http://127.0.0.1:8080/search"))
+
                     result = await searxng.search(
                         serp_query.query, timeout=15000, limit=5
                     )
