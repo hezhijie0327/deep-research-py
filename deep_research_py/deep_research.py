@@ -208,7 +208,7 @@ async def process_serp_result(
     )
 
     try:
-        result = json.loads(json.dump(response.choices[0].message.content, ensure_ascii=False))
+        result = json.loads(json.dumps(response.choices[0].message.content, ensure_ascii=False))
         return {
             "learnings": result.get("learnings", [])[:num_learnings],
             "followUpQuestions": result.get("followUpQuestions", [])[
@@ -256,7 +256,7 @@ async def write_final_report(
     )
 
     try:
-        result = json.loads(json.dump(response.choices[0].message.content, ensure_ascii=False))
+        result = json.loads(json.dumps(response.choices[0].message.content, ensure_ascii=False))
         report = result.get("reportMarkdown", "")
 
         # Append sources
