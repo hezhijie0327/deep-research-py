@@ -119,6 +119,7 @@ class SearXNG:
             return {"data": []}
 
 
+SEARCH_PROVIDER = os.environ.get("SEARCH_PROVIDER", "firecrawl").lower()
 if SEARCH_PROVIDER == "firecrawl":
     # Initialize Firecrawl
     firecrawl = Firecrawl(
