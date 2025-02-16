@@ -2,7 +2,6 @@ from typing import List
 import asyncio
 import openai
 import json
-import json5
 from .prompt import system_prompt
 
 
@@ -27,7 +26,7 @@ async def generate_feedback(query: str, client: openai.OpenAI, model: str) -> Li
 
     # Parse the JSON response
     try:
-        result = json.loads(json5.loads(response.choices[0].message.content))
+        result = json.loads(json.dump(response.choices[0].message.content, ensure_ascii=False))
         return result.get("questions", [])
     except json.JSONDecodeError as e:
         print(f"Error parsing JSON response: {e}")
