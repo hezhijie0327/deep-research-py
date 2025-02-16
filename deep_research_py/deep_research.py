@@ -119,8 +119,8 @@ class SearXNG:
             return {"data": []}
 
 
-SEARCH_PROVIDER = os.environ.get("SEARCH_PROVIDER", "firecrawl").lower()
-if SEARCH_PROVIDER == "firecrawl":
+search_provider = os.environ.get("SEARCH_PROVIDER", "firecrawl").lower()
+if search_provider == "firecrawl":
     # Initialize Firecrawl
     firecrawl = Firecrawl(
         api_key=os.environ.get("FIRECRAWL_API_KEY", ""),
@@ -309,7 +309,7 @@ async def deep_research(
         async with semaphore:
             try:
                 # Search for content
-                if SEARCH_PROVIDER == "firecrawl":
+                if search_provider == "firecrawl":
                     result = await firecrawl.search(
                         serp_query.query, timeout=15000, limit=5
                     )
