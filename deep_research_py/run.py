@@ -44,7 +44,7 @@ async def main(
         help="Which service to use? [openai|deepseek]",
     ),
     model: str = typer.Option(
-        default="o3-mini",
+        default=os.getenv("OPENAI_MODEL", "o3-mini"),
         help="Which model to use?"
     ),
 ):
