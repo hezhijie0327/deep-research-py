@@ -7,6 +7,7 @@ from firecrawl import FirecrawlApp
 from .ai.providers import trim_prompt
 from .prompt import system_prompt
 import json
+import aiohttp
 
 
 class SearchResponse(TypedDict):
@@ -80,11 +81,53 @@ class Firecrawl:
             return {"data": []}
 
 
+class SearXNG:
+    """Simple wrapper for SearXNG search API."""
+
+    def __init__(self, api_url: str = "http://127.0.0.1:8080/search"):
+        self.api_url = api_url
+
+    async def search(
+        self, query: str, timeout: int = 15000, limit: int = 5
+    ) -> SearchResponse:
+        """Search using SearXNG API."""
+        try:
+            params = {
+                "q": query,
+                "format": "json"
+            }
+
+            async with aiohttp.ClientSession() as session:
+                async with session.get(self.api_url, params=params, timeout=timeout / 1000) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        formatted_data = []
+                        for result in data.get("results", []):
+                            formatted_data.append({
+                                "url": result.get("url", ""),
+                                "title": result.get("title", ""),
+                                "content": result.get("content", ""),
+                                "markdown": f"# {result.get('title', '')}\n\n{result.get('content', '')}",
+                            })
+                        return {"data": formatted_data}
+                    else:
+                        print(f"Error searching with SearXNG: {response.status}")
+                        return {"data": []}
+
+        except Exception as e:
+            print(f"Error searching with SearXNG: {e}")
+            return {"data": []}
+
+
 # Initialize Firecrawl
 firecrawl = Firecrawl(
     api_key=os.environ.get("FIRECRAWL_API_KEY", ""),
     api_url=os.environ.get("FIRECRAWL_BASE_URL"),
 )
+
+
+# Initialize SearXNG
+searxng = SearXNG(api_url=os.environ.get("SEARXNG_API_URL", "http://127.0.0.1:8080/search"))
 
 
 async def generate_serp_queries(
@@ -265,9 +308,14 @@ async def deep_research(
         async with semaphore:
             try:
                 # Search for content
-                result = await firecrawl.search(
-                    serp_query.query, timeout=15000, limit=5
-                )
+                if SEARCH_PROVIDER == "firecrawl":
+                    result = await firecrawl.search(
+                        serp_query.query, timeout=15000, limit=5
+                    )
+                else:
+                    result = await searxng.search(
+                        serp_query.query, timeout=15000, limit=5
+                    )
 
                 # Collect new URLs
                 new_urls = [
