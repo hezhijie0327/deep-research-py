@@ -26,7 +26,7 @@ async def generate_feedback(query: str, client: openai.OpenAI, model: str) -> Li
 
     # Parse the JSON response
     try:
-        result = json.loads(json.dumps(response.choices[0].message.content, ensure_ascii=False))
+        result = json.loads(response.choices[0].message.content)
         return result.get("questions", [])
     except json.JSONDecodeError as e:
         print(f"Error parsing JSON response: {e}")
